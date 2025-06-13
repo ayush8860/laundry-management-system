@@ -1,66 +1,60 @@
 const LaundryRequest = require('../models/LaundryRequest');
 
-// @desc    Create a new laundry request
-// @route   POST /api/laundry
-// @access  Private
-exports.createLaundryRequest = async (req, res) => {
+exports.submitLaundryRequest = async (req, res) => {
   try {
-    const { serviceType, clothesCount, pickupDate } = req.body;
-
-    const newRequest = await LaundryRequest.create({
-      user: req.user._id,
-      serviceType,
-      clothesCount,
-      pickupDate,
-      status: 'pending',
-    });
-
-    res.status(201).json({ message: 'Laundry request created', data: newRequest });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    const request = new LaundryRequest({ ...req.body, user: req.user._id });
+    await request.save();
+    res.status(201).json({ message: 'Laundry request submitted', request });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-// @desc    Get logged-in user's laundry requests
-// @route   GET /api/laundry/my
-// @access  Private
-exports.getUserLaundryRequests = async (req, res) => {
+exports.getAllRequests = async (req, res) => {
   try {
-    const requests = await LaundryRequest.find({ user: req.user._id }).sort({ createdAt: -1 });
+    const requests = await LaundryRequest.find().populate('user', 'name email');
     res.json(requests);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
-// @desc    Get all laundry requests (admin only)
-// @route   GET /api/laundry/all
-// @access  Admin
-exports.getAllLaundryRequests = async (req, res) => {
-  try {
-    const requests = await LaundryRequest.find().populate('user', 'name email').sort({ createdAt: -1 });
-    res.json(requests);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
-  }
-};
-
-// @desc    Update laundry request status
-// @route   PUT /api/laundry/:id/status
-// @access  Admin
-exports.updateLaundryStatus = async (req, res) => {
+exports.updateRequestStatus = async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
 
-    const request = await LaundryRequest.findById(id);
-    if (!request) return res.status(404).json({ message: 'Request not found' });
-
-    request.status = status;
-    await request.save();
-
-    res.json({ message: 'Status updated', data: request });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error: error.message });
+    const request = await LaundryRequest.findByIdAndUpdate(id, { status }, { new: true });
+    res.json({ message: 'Status updated', request });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
+exports.getMyRequests = async (req, res) => {
+    try {
+      const requests = await LaundryRequest.find({ user: req.user._id }).sort({ createdAt: -1 });
+      res.json(requests);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  };
+  // Delete user's own request
+exports.deleteMyRequest = async (req, res) => {
+    try {
+      const request = await LaundryRequest.findOne({
+        _id: req.params.id,
+        user: req.user._id,
+      });
+  
+      if (!request) {
+        return res.status(404).json({ message: 'Request not found' });
+      }
+  
+      await request.deleteOne();
+      res.json({ message: 'Laundry request deleted' });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
+  };
+  
+  

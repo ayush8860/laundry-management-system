@@ -2,10 +2,9 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Register User
+// Register Normal User
 const registerUser = async (req, res) => {
   try {
-    console.log("🔁 register route hit");
     const { name, email, password } = req.body;
 
     const userExists = await User.findOne({ email });
@@ -20,7 +19,24 @@ const registerUser = async (req, res) => {
   }
 };
 
-// Login User
+// Register Admin
+const registerAdmin = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    const adminExists = await User.findOne({ email });
+    if (adminExists) return res.status(400).json({ message: 'Admin already exists' });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const admin = await User.create({ name, email, password: hashedPassword, role: 'admin' });
+
+    res.status(201).json({ message: 'Admin registered successfully', admin });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+// Login
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -41,31 +57,4 @@ const loginUser = async (req, res) => {
   }
 };
 
-// Middleware to protect routes
-const protect = async (req, res, next) => {
-  try {
-    const token = req.headers.authorization?.split(' ')[1];
-    if (!token) return res.status(401).json({ message: 'Unauthorized' });
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = await User.findById(decoded.id).select('-password');
-    next();
-  } catch (err) {
-    res.status(401).json({ message: 'Unauthorized' });
-  }
-};
-
-// Admin-only access control
-const adminOnly = (req, res, next) => {
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Access denied: Admins only' });
-  }
-  next();
-};
-
-module.exports = {
-  registerUser,
-  loginUser,
-  protect,
-  adminOnly
-};
+module.exports = { registerUser, registerAdmin, loginUser };

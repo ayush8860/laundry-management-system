@@ -1,25 +1,18 @@
 const express = require('express');
 const router = express.Router();
-
-const {
-  createLaundryRequest,
-  getUserLaundryRequests,
-  getAllLaundryRequests,
-  updateLaundryStatus
-} = require('../controllers/laundryController');
-
+const { submitLaundryRequest, getAllRequests, updateRequestStatus, getMyRequests, deleteMyRequest, } = require('../controllers/laundryController');
 const { protect, adminOnly } = require('../middleware/authMiddleware');
 
-// POST a new laundry request (User)
-router.post('/', protect, createLaundryRequest);
+// User submits a laundry request
+router.post('/submit', protect, submitLaundryRequest);
+// Logged-in user fetches their own requests
+router.get('/my-requests', protect, getMyRequests);
 
-// GET all requests of logged-in user
-router.get('/my', protect, getUserLaundryRequests);
 
-// GET all requests (Admin only)
-router.get('/all', protect, adminOnly, getAllLaundryRequests);
+// Admin gets all requests
+router.get('/requests', protect, adminOnly, getAllRequests);
 
-// PUT update status of a request (Admin only)
-router.put('/:id/status', protect, adminOnly, updateLaundryStatus);
+// Admin updates request status
+router.patch('/requests/:id', protect, adminOnly, updateRequestStatus);
 
 module.exports = router;

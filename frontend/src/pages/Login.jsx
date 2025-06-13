@@ -72,17 +72,38 @@ export default function SignIn(props) {
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     if (!validateInputs()) return;
-
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+  
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+  
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+  
+      const data = await res.json();
+  
+      if (!res.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+  
+      // Save the token and optionally user info
+      localStorage.setItem('token', data.token);
+      // Redirect to dashboard
+      window.location.href = '/dashboard';
+    } catch (err) {
+      // Show error in a user-friendly way (you can also use Snackbar or Alert)
+      alert(err.message);
+    }
   };
-
+  
   const validateInputs = () => {
     const email = document.getElementById('email');
     const password = document.getElementById('password');
