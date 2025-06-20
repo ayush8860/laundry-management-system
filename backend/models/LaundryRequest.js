@@ -13,3 +13,4 @@ const laundryRequestSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('LaundryRequest', laundryRequestSchema);
+// all laundry requests are present here

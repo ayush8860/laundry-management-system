@@ -58,3 +58,4 @@ const loginUser = async (req, res) => {
 };
 
 module.exports = { registerUser, registerAdmin, loginUser };
+// 
