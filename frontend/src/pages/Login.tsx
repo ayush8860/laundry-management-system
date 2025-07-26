@@ -148,24 +148,7 @@ const Login = () => {
         </Card>
 
         {/* Demo Accounts */}
-        <Card className="bg-muted/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm">Demo Accounts</CardTitle>
-            <CardDescription className="text-xs">
-              Use these credentials to test the system
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="pt-0 space-y-2 text-xs">
-            <div className="flex justify-between">
-              <span className="font-medium">User:</span>
-              <span className="text-muted-foreground">user@demo.com / password</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="font-medium">Admin:</span>
-              <span className="text-muted-foreground">admin@demo.com / password</span>
-            </div>
-          </CardContent>
-        </Card>
+        
       </div>
     </div>
   );

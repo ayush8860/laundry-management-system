@@ -4,11 +4,11 @@ import bcrypt from 'bcryptjs';
 
 export async function register(req, res) {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, phone, block, roomNumber } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) return res.status(400).json({ message: 'Email already in use' });
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword });
+    const user = new User({ name, email, password: hashedPassword, phone, block, roomNumber });
     await user.save();
     res.status(201).json({ message: 'User registered' });
   } catch (err) {

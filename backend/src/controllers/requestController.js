@@ -15,8 +15,8 @@ export async function getMyRequests(req, res) {
 export async function createRequest(req, res) {
   const userId = req.user?.userId;
   if (!userId) return res.status(401).json({ message: 'Unauthorized' });
-  const { items } = req.body;
-  const request = new Request({ user: userId, items });
+  const { items, address, specialInstructions, preferredDate, preferredTime } = req.body;
+  const request = new Request({ user: userId, items, address, specialInstructions, preferredDate, preferredTime });
   await request.save();
   res.status(201).json(request);
 }
