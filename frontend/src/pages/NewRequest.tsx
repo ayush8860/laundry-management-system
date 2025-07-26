@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Minus, Package, MapPin, Calendar, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
+import { apiFetch } from "@/lib/api"; // at the top
 
 interface LaundryItem {
   id: string;
@@ -95,7 +96,7 @@ const NewRequest = () => {
 
   const totalCost = items.reduce((sum, item) => sum + (item.quantity * item.pricePerItem), 0);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (items.length === 0) {
       toast({
         title: "No Items Added",
@@ -114,14 +115,25 @@ const NewRequest = () => {
       return;
     }
 
-    // Here you would normally send to Supabase
-    toast({
-      title: "Request Submitted!",
-      description: "Your laundry request has been submitted successfully. You'll receive a confirmation shortly.",
-    });
-
-    // Navigate to requests page
-    navigate("/requests");
+    try {
+      await apiFetch("/requests", {
+        method: "POST",
+        body: JSON.stringify({
+          items: items.map(item => item.type), // or adjust as needed
+        }),
+      });
+      toast({
+        title: "Request Submitted!",
+        description: "Your laundry request has been submitted successfully.",
+      });
+      navigate("/requests");
+    } catch (err) {
+      toast({
+        title: "Submission Failed",
+        description: err.message || "Could not submit request",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

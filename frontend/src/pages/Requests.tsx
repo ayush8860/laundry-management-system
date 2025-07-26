@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,71 +7,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Search, Filter, Calendar, Package, MapPin } from "lucide-react";
 import StatusBadge from "@/components/StatusBadge";
 import { Link } from "react-router-dom";
+import { apiFetch } from "@/lib/api";
 
 const Requests = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [requests, setRequests] = useState([]);
 
-  // Mock data - replace with actual data from Supabase
-  const requests = [
-    {
-      id: "REQ001",
-      items: [
-        { type: "Shirts", quantity: 3, service: "Wash & Iron" },
-        { type: "Jeans", quantity: 2, service: "Wash Only" },
-        { type: "Towels", quantity: 1, service: "Wash & Dry" },
-      ],
-      status: "delivered" as const,
-      requestDate: "2024-01-15T10:30:00",
-      pickupDate: "2024-01-15T14:00:00",
-      deliveryDate: "2024-01-17T16:30:00",
-      cost: 45.00,
-      specialInstructions: "Handle delicate items with care",
-      address: "Room 204, Block A",
-    },
-    {
-      id: "REQ002",
-      items: [
-        { type: "Bed Sheets", quantity: 2, service: "Wash & Iron" },
-        { type: "Pillowcases", quantity: 4, service: "Wash & Iron" },
-      ],
-      status: "in-process" as const,
-      requestDate: "2024-01-16T09:15:00",
-      pickupDate: "2024-01-16T13:00:00",
-      deliveryDate: "2024-01-18T15:00:00",
-      cost: 30.00,
-      specialInstructions: "",
-      address: "Room 204, Block A",
-    },
-    {
-      id: "REQ003",
-      items: [
-        { type: "T-shirts", quantity: 5, service: "Wash & Fold" },
-        { type: "Shorts", quantity: 2, service: "Wash & Fold" },
-      ],
-      status: "picked-up" as const,
-      requestDate: "2024-01-17T08:45:00",
-      pickupDate: "2024-01-17T12:00:00",
-      deliveryDate: "2024-01-19T14:00:00",
-      cost: 25.00,
-      specialInstructions: "No fabric softener please",
-      address: "Room 204, Block A",
-    },
-    {
-      id: "REQ004",
-      items: [
-        { type: "Formal Shirts", quantity: 2, service: "Dry Clean" },
-        { type: "Suit", quantity: 1, service: "Dry Clean" },
-      ],
-      status: "pending" as const,
-      requestDate: "2024-01-18T11:20:00",
-      pickupDate: null,
-      deliveryDate: "2024-01-20T16:00:00",
-      cost: 75.00,
-      specialInstructions: "Express service required",
-      address: "Room 204, Block A",
-    },
-  ];
+  useEffect(() => {
+    apiFetch("/requests/my")
+      .then(setRequests)
+      .catch(() => setRequests([]));
+  }, []);
 
   const filteredRequests = requests.filter(request => {
     const matchesSearch = request.id.toLowerCase().includes(searchTerm.toLowerCase()) ||

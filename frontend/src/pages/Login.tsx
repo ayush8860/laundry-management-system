@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Droplets, Eye, EyeOff, Mail, Lock } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { apiFetch } from "@/lib/api"; // at the top
 
 const Login = () => {
   const navigate = useNavigate();
@@ -22,15 +23,26 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call - replace with actual Supabase auth
-    setTimeout(() => {
+    try {
+      const data = await apiFetch("/auth/login", {
+        method: "POST",
+        body: JSON.stringify(formData),
+      });
+      localStorage.setItem("token", data.token);
       toast({
         title: "Login Successful!",
         description: "Welcome back to LaundryPro",
       });
       navigate("/dashboard");
+    } catch (err) {
+      toast({
+        title: "Login Failed",
+        description: err.message || "Invalid credentials",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

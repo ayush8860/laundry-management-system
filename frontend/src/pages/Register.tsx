@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Droplets, Eye, EyeOff, Mail, Lock, User, MapPin, Phone } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { apiFetch } from "@/lib/api"; // at the top
 
 const Register = () => {
   const navigate = useNavigate();
@@ -50,15 +51,29 @@ const Register = () => {
 
     setIsLoading(true);
 
-    // Simulate API call - replace with actual Supabase auth
-    setTimeout(() => {
+    try {
+      await apiFetch("/auth/register", {
+        method: "POST",
+        body: JSON.stringify({
+          name: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
       toast({
         title: "Account Created!",
-        description: "Welcome to LaundryPro. Please verify your email.",
+        description: "Welcome to LaundryPro. Please log in.",
       });
       navigate("/login");
+    } catch (err) {
+      toast({
+        title: "Registration Failed",
+        description: err.message || "Could not create account",
+        variant: "destructive",
+      });
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
